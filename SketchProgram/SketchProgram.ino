@@ -49,7 +49,7 @@ void setup() {
  
 void loop() {
 
-
+  run();
 }
 
 /* FSM
@@ -64,7 +64,7 @@ void loop() {
 
 
 void run(){
-
+  while(1){
   // #1 If left and right sensors see white and middle sensors detects the black line.
   if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW)
   {
@@ -79,46 +79,111 @@ void run(){
   // solves dead end.
   else if (digitalRead(left_sens) == LOW && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == LOW)
   {
+    fullStop();
     // if no detection.
     while(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == LOW){
-       //clockwiseSpin();
-       turnRight();
+        clockwiseSpin();
+       //turnRight();
     }
     fullStop();
+    delay(500);
+
+    if(digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW ){
+      moveBackward();
+          delay(100);
+          fullStop();
+
+          turnRight();
+          delay(50);
+          fullStop();
+          while(digitalRead(right_sens) == LOW){
+            moveForward();
+          }
+    }
+    
+     else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == HIGH){
+        moveBackward();
+          delay(100);
+          fullStop();
+
+          turnLeft();
+          delay(50);
+          fullStop();
+        while(digitalRead(left_sens) == LOW){
+          
+         
+          moveForward();
+        }
+      }
+      
+      else if(digitalRead(middle_sens) == HIGH && digitalRead(left_sens) == HIGH && digitalRead(right_sens) == HIGH){
+        while(digitalRead(middle_sens) == HIGH && digitalRead(left_sens) == HIGH && digitalRead(right_sens) == HIGH){
+          fullStop();
+        }
+      }
     
     // check which sensor hits the black line first.
     // situation is the line is still in the middle so adjust it so the middle sensor is back on it.
-    if (digitalRead(left_sens) == HIGH){
+    if (digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == LOW){
       // spin counterclock until middle hits black
       while(digitalRead(middle_sens) == LOW)
       {
         //counterClockSpin();
         turnLeft();
       }
+
       fullStop();
+      if(digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW){
+          moveBackward();
+          delay(100);
+          fullStop();
+
+          turnLeft();
+          delay(50);
+          fullStop();
+        while(digitalRead(right_sens) == LOW){
+         
+          //turnLeft();
+          moveForward();
+        }
+      }
+      fullStop();
+      break;
     }
     
     // Situation - tape still in middle
-    else if(digitalRead(middle_sens) == HIGH)
+    else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW)
     {
       fullStop();
+      break;
       // normal operation, let it loop back to #1
     }
     
     // situation - spinning clockwise and right sensor hitting first likely means 180 past the deadend.
     // Align middle sensor
-    else if(digitalRead(right_sens) == HIGH)
+    else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == HIGH)
     {
       while(digitalRead(middle_sens) == LOW)
       {
         //clockwiseSpin();
         turnRight();
       }
+      if(digitalRead(right_sens) == HIGH && digitalRead(middle_sens) == HIGH && digitalRead(left_sens) == LOW){
+        moveBackward();
+          delay(100);
+          fullStop();
+        while(digitalRead(left_sens) == LOW){
+          
+          turnRight();
+          //moveForward();
+        }
+      }
       fullStop();
+      break;
     }
   }
   
-  // # 3 RE-ALIGN
+  // # 3 RE-ALIGN left
   else if(digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == LOW){
     // If left sensor is HIGH, detects the black line, adjust left.
     // case where middle is not one black
@@ -127,16 +192,42 @@ void run(){
     {
       while(digitalRead(middle_sens) == LOW)
       {
-        if(digitalRead(right_sens) == HIGH && digitalRead(left_sens) == HIGH){
+        if( digitalRead(left_sens) == HIGH && digitalRead(right_sens) == HIGH){
           fullStop();
           break;  // evaluate if end in first check for both sensors black, just break
         }
+        // curves detection, so it doesn't think there is a hard turn
+        if(digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == HIGH){
+          moveBackward();
+          delay(100);
+          fullStop();
+          while(digitalRead(left_sens) == LOW){
+            //moveForward();
+            turnRight();
+          }
+          fullStop();
+        }
+        
         // Pivot Left
-        counterClockSpin();
+        //counterClockSpin();
+        turnLeft();
       }
       fullStop();
+
+      // need to check after
+      // curves detection, so it doesn't think there is a hard turn
+      if(digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == HIGH){
+        moveBackward();
+          delay(100);
+          fullStop();
+        while(digitalRead(left_sens) == LOW){
+          //moveForward();
+          turnRight();
+        }
+        fullStop();
+      }
     }
-  }
+  } // Re- align right
   else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == HIGH){
     // If right sensor is HIGH, detects the black line, adjust right.
     // case where middle is not one black
@@ -147,10 +238,35 @@ void run(){
           fullStop();
           break;  // evaluate if end in first check for both sensors black, just break
         }
+         // curves detection, so it doesn't think there is a hard turn
+        if(digitalRead(middle_sens) == HIGH && digitalRead(left_sens) == HIGH){
+          moveBackward();
+          delay(100);
+          fullStop();
+          while(digitalRead(right_sens) == LOW){
+            //moveForward();
+            turnLeft();
+          }
+          fullStop();
+        }
         // Pivot Right
-        clockwiseSpin();        
+        //clockwiseSpin(); 
+        turnRight();
       }
       fullStop();
+
+      // need to check after
+      // curves detection, so it doesn't think there is a hard turn
+      if(digitalRead(middle_sens) == HIGH && digitalRead(left_sens) == HIGH){
+        moveBackward();
+          delay(100);
+          fullStop();
+        while(digitalRead(right_sens) == LOW){
+          //moveForward();
+          turnLeft();
+        }
+        fullStop();
+      }
   }
   
   // # 4 Hard turns
@@ -158,7 +274,7 @@ void run(){
   else if(digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW){
 
     moveForward();
-    delay(50);
+    delay(100);
     fullStop();
     
     // counter clock spin middle sensor off black if "+" junction if "+"
@@ -168,10 +284,12 @@ void run(){
     }
     fullStop();
 
+
     // counter clock spin middle to the left black line of the junction.
     while(digitalRead(middle_sens) == LOW){
-      //counterClockSpin();
+                  //counterClockSpin();
       turnLeft();
+      
     }
     fullStop();
   }
@@ -179,8 +297,10 @@ void run(){
   // right turn
   else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == HIGH)
     {
+      fullStop();
+      
     moveForward();
-    delay(50);
+    delay(100);
     fullStop();
 
     // counter clock spin middle sensor off black if "+" junction if "+"
@@ -194,17 +314,26 @@ void run(){
     while(digitalRead(middle_sens) == LOW){
       //clockwiseSpin();
       turnRight();
+     
     }
     
-    fullStop();   
+    fullStop();
+
   }
   
   // #5 T junction. always turn right.
   else if(digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == HIGH)
   {
-
+    fullStop();
     moveForward();
-    delay(50);
+    delay(100);
+    fullStop();
+
+    //if somehow middle is on black
+    while(digitalRead(middle_sens) == HIGH){
+      //clockwiseSpin();
+      turnRight();
+    }
     fullStop();
     
     // counter clock spin middle to the right black line of the junction.
@@ -221,7 +350,7 @@ void run(){
       fullStop();
     }
   }
-  
+  }
 }
 
 // 3 sensor always choose left turn at junctions
