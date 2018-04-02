@@ -593,6 +593,7 @@ void HardCoded(){
 
 
 void run(){
+  int ignoreFlag = 0;
   while(1){
   // #1 If left and right sensors see white and middle sensors detects the black line.
   if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW)
@@ -643,7 +644,7 @@ void run(){
       fullStop();
 
       }
-      fullStop();
+
   
     
     
@@ -659,6 +660,7 @@ void run(){
     // Align middle sensor
     else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == LOW && digitalRead(right_sens) == HIGH)
     {
+      ignoreFlag = 1;
       while(digitalRead(middle_sens) == LOW)
       {
         //clockwiseSpin();
@@ -764,71 +766,77 @@ void run(){
   // Left turn
   else if(digitalRead(left_sens) == HIGH && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW){
 
-    moveForward();
-    delay(200);
-    fullStop();
-
-
-
-    
-    // counter clock spin middle sensor off black if "+" junction if "+"
-    while(digitalRead(middle_sens) == HIGH){
-      //counterClockSpin();
-      turnLeft();
-    }
-    fullStop();
-
-
-    // counter clock spin middle to the left black line of the junction.
-    while(digitalRead(middle_sens) == LOW){
-                  //counterClockSpin();
-      turnLeft();
+    if(ignoreFlag == 0){
+      moveForward();
+      delay(200);
+      fullStop();
+  
+  
+  
       
+      // counter clock spin middle sensor off black if "+" junction if "+"
+      while(digitalRead(middle_sens) == HIGH){
+        //counterClockSpin();
+        turnLeft();
+      }
+      fullStop();
+  
+  
+      // counter clock spin middle to the left black line of the junction.
+      while(digitalRead(middle_sens) == LOW){
+                    //counterClockSpin();
+        turnLeft();
+        
+      }
+      fullStop();
+    } else {
+      ignoreFlag = 0;
     }
-    fullStop();
-    
   }
 
   // right turn
   else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == HIGH)
     {
+      if(ignoreFlag == 0){
+        fullStop();
+        
+      moveForward();
+      delay(200);
+      fullStop();
+  
+  
+  /*
+      while(digitalRead(right_sens) == HIGH){
+        //clockwiseSpin();
+        turnRight();
+      }
       fullStop();
       
-    moveForward();
-    delay(200);
-    fullStop();
-
-
-/*
-    while(digitalRead(right_sens) == HIGH){
-      //clockwiseSpin();
-      turnRight();
-    }
-    fullStop();
-    
-    while(digitalRead(right_sens) == LOW && digitalRead(right_sens) == LOW){
-      clockwiseSpin();
-      //turnRight();
-    }
-    fullStop();
-*/
-
-    // counter clock spin middle sensor off black if "+" junction if "+"
-    while(digitalRead(middle_sens) == HIGH){
-      //clockwiseSpin();
-      turnRight();
-    }
-    fullStop();
-
-    // counter clock spin middle to the left black line of the junction.
-    while(digitalRead(middle_sens) == LOW){
-      //clockwiseSpin();
-      turnRight();
-     
-    }
-    
-    fullStop();
-
+      while(digitalRead(right_sens) == LOW && digitalRead(right_sens) == LOW){
+        clockwiseSpin();
+        //turnRight();
+      }
+      fullStop();
+  */
+  
+      // counter clock spin middle sensor off black if "+" junction if "+"
+      while(digitalRead(middle_sens) == HIGH){
+        //clockwiseSpin();
+        turnRight();
+      }
+      fullStop();
+  
+      // counter clock spin middle to the left black line of the junction.
+      while(digitalRead(middle_sens) == LOW){
+        //clockwiseSpin();
+        turnRight();
+       
+      }
+      
+      fullStop();
+      } else {
+        ignoreFlag = 0;
+      }
   }
   
   // #5 T junction. always turn right.
