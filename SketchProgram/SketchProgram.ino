@@ -642,7 +642,7 @@ void run(){
       }
       fullStop();
   
-    }
+    
     
     // Situation - tape still in middle
     else if(digitalRead(left_sens) == LOW && digitalRead(middle_sens) == HIGH && digitalRead(right_sens) == LOW)
@@ -664,6 +664,7 @@ void run(){
       fullStop();
       
     }
+  }
   
   
   // # 3 RE-ALIGN left
